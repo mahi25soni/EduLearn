@@ -1,4 +1,6 @@
 const mongoose = require("mongoose")
+const { sendEmail } = require("../config/sendGridConfig")
+require("dotenv").config()
 
 const userSchema = new mongoose.Schema({
     username : {
@@ -26,6 +28,14 @@ const userSchema = new mongoose.Schema({
     password : {
         type : String,
         required : true
+    },
+    otp : {
+        type : Number,
+        required : true
+    },
+    active : {
+        type : Boolean,
+        default : false
     }
 },
 {
@@ -33,7 +43,10 @@ const userSchema = new mongoose.Schema({
 }    
 )
 
+
 const Users = new mongoose.model("Users", userSchema)
+
+
 
 module.exports = {
     Users
