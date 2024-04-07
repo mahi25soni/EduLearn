@@ -7,7 +7,51 @@ const {Users}  = require("../models/userModel")
 const {sendEmail, createMessage} = require("../config/sendGridConfig");
 require("dotenv").config();
 
+const sendOtpViaEmail = (user) => {
+    const msg = createMessage(user.email, user.otp)
+    sendEmail(msg);
 
+    setTimeout(async function() {
+        try {
+            user.otp = 0;
+            console.log('userToken removed successfully after 30 seconds');
+            user.save();
+        } catch (error) {
+            console.error('Error removing userToken:', error);
+        }
+    }, 30 * 1000); 
+}
+const otpVerification = (isUser, otp) => {
+    if(!isUser) {
+        return {
+            status : 404, 
+            valid : false,
+            message : "No User Exists on this email"
+        }
+    }
+
+    if(isUser.otp === 0) {
+        return {
+            status : 409,
+            valid : false,
+            message : "OTP expired, try again!"
+        }    
+    }
+
+    if(isUser.otp !== otp){
+        return {
+            status : 410,
+            valid : false,
+            message : "OTP doesn't match, try again!"
+        }
+    }
+
+    return {
+        status : 200,
+        valid : true,
+        message : ""
+    }
+}
 const userSignUp = async (req, res) => {
     try{
         const emailCheck = await Users.findOne({email : req.body.email})
@@ -32,18 +76,7 @@ const userSignUp = async (req, res) => {
             password : hash_pass
         })
 
-        const msg = createMessage(new_user.email, new_user.otp)
-        sendEmail(msg);
-
-        setTimeout(async function() {
-            try {
-                new_user.otp = 0;
-                console.log('userToken removed successfully after 30 seconds');
-                new_user.save();
-            } catch (error) {
-                console.error('Error removing userToken:', error);
-            }
-        }, 30 * 1000); 
+        sendOtpViaEmail(new_user)
 
         // yaha res json ki jagah res.redirect better option rahega
         res.status(201).json({
@@ -60,6 +93,39 @@ const userSignUp = async (req, res) => {
         })
     }
 }
+
+const userSignUpVerify = async (req, res) => {
+    try{
+        const {email, otp} = req.body;
+        const isUser = await Users.findOne({email : email})
+
+        const {status, valid, message } = otpVerification(isUser, otp)
+
+        if(!valid) {
+            return res.status(status).json({
+                success : valid,
+                message
+            })
+        }
+        // OTP matched
+        isUser.active = true;
+        isUser.save();
+        res.status(201).json({
+            success : true,
+            message : "User actived!",
+            data : isUser
+        })
+
+    } catch(error) {
+        console.log(error.message)
+
+        return res.status(500).json({
+            success : false,
+            message : "Unknown error while verifying user!"
+        })
+    }
+}
+
 
 const userLogIn = async (req, res) => {
     try{
@@ -120,40 +186,31 @@ const userLogIn = async (req, res) => {
 
 const userForgotPassword = async (req, res) => {
     try{
-        // check if the email is valid
-        // sendEmail()
-        // const {email} = req.body
-        // const isUser = await Users.findOne({email : email})
-        // if(!isUser) {
-        //     return res.status(404).json({
-        //         success : false,
-        //         message : "This user doesn't exists!"
-        //     })
-        // }
 
+        const {email} = req.body
+        const isUser = await Users.findOne({email : email})
+        if(!isUser) {
+            return res.status(404).json({
+                success : false,
+                message : "This user doesn't exists!"
+            })
+        }
 
-        // const new_token_holder = await userToken.create();
+        const otp = otpGenerator.generate(6, {
+            upperCaseAlphabets : false,
+            lowerCaseAlphabets : false,
+            specialChars : false
+        })
+        isUser.otp = otp;
+        isUser.save();
+        console.log("yaha tak chala kya?", isUser)
+        sendOtpViaEmail(isUser)
 
-
-        // res.redirec('/setFo')
-        // const {otp, uniqueID} = getOtpUuid();
-        // console.log(otp, uniqueID)
-        // const new_user_token = await userToken.create({
-        //     token_id : uniqueID, otp
-        // })
-
-        // setTimeout(async () => {
-        //     try {
-        //         await userToken.deleteOne({_id : new_user_token._id});
-        //         console.log('userToken removed successfully after 30 seconds');
-        //     } catch (error) {
-        //         console.error('Error removing userToken:', error);
-        //     }
-        // }, 15 * 1000); // 30 seconds in milliseconds
-
-        // console.log("s;lkdfj;slfdjs;ldkfj")
-        // console.log(new_user_token)
-        // res.send(new_user_token)
+        // redirect to forgotPasswordVefiryURL
+        res.json({
+            message : "First part done, email sent",
+            data : isUser
+        })
 
     } catch(error) {
         return res.status(500).json({
@@ -163,47 +220,58 @@ const userForgotPassword = async (req, res) => {
     }
 }
 
-const userVerify = async (req, res) => {
+const forgotPasswordVerify = async (req, res) => {
     try{
         const {email, otp} = req.body;
         const isUser = await Users.findOne({email : email})
 
-        if(!isUser) {
-            return res.status(409).json({
-                success : false,
-                message : "No User Exists on this email"
+        const {status, valid, message } = otpVerification(isUser, otp)
+
+        if(!valid) {
+            return res.status(status).json({
+                success : valid,
+                message : message
             })
         }
-
-        if(isUser.otp === 0) {
-            return res.status(410).json({
-                success : false,
-                message : "OTP expired, try again!"
-            })          
-        }
-
-        if(isUser.otp !== otp){
-            return res.status(401).json({
-                success : false,
-                message : "OTP doesn't match, try again!"
-            })   
-        }
-
         // OTP matched
-        isUser.active = true;
-        isUser.save();
-        res.status(201).json({
-            success : true,
-            message : "User actived!",
+        // Redirect to setNewPassword
+        res.json({
+            message : "second part done, otp verified",
             data : isUser
         })
 
-    } catch(error) {
-        console.log(error.message)
-
+    }
+    catch(error) {
         return res.status(500).json({
             success : false,
-            message : "Unknown error while verifying user!"
+            message : "Unknown error while log in!"
+        })
+    }
+}
+const setNewPassword = async(req, res) => {
+    try{
+        const {email, new_password} = req.body;
+        console.log("New shit is ", req.body)
+        const isUser = await Users.findOne({email : email})
+        if(!isUser) {
+            return res.status(404).json({
+                success : false,
+                message : "This user doesn't exists!"
+            })
+        }
+        const hash_pass = await bcrypt.hash(new_password, 10)
+        const updated_user = await Users.findByIdAndUpdate({_id : isUser._id} , {password : hash_pass}, {new : true})
+
+        res.status(200).json({
+            success : true,
+            message : "Password upated!",
+            data : updated_user
+        })
+
+    } catch(error) {
+        return res.status(500).json({
+            success : false,
+            message : "Unknown error while log in!"
         })
     }
 }
@@ -221,7 +289,12 @@ const updateUser = async (req, res) => {
 
 module.exports = {
     userSignUp,
+    userSignUpVerify,
+
     userLogIn, 
+
     userForgotPassword,
-    userVerify
+    forgotPasswordVerify,
+    setNewPassword
+
 }
