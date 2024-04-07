@@ -150,7 +150,8 @@ const userLogIn = async (req, res) => {
                 const payload = {
                     username : isUser.username,
                     email : isUser.email,
-                    role : isUser.role
+                    role : isUser.role,
+                    active : isUser.active
                 }
 
                 jwt.sign(payload, process.env.JWT_SECRET_KEY, (err, result) => {
@@ -166,7 +167,7 @@ const userLogIn = async (req, res) => {
                             expires : new Date(Date.now() + 3*24*60*60*1000),
                             httpOnly : true
                         }
-                        res.cookie("login_token", result, cookie_option)
+                        res.cookie(process.env.TOKEN_NAME, result, cookie_option)
                         res.status(200).json({
                             success : true,
                             message : "Login Successfully!"
@@ -319,6 +320,7 @@ module.exports = {
     userForgotPassword,
     forgotPasswordVerify,
     setNewPassword,
+
     resetPassword
 
 }
