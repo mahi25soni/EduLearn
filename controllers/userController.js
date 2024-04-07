@@ -276,16 +276,39 @@ const setNewPassword = async(req, res) => {
     }
 }
 
-const updateUser = async (req, res) => {
+const resetPassword = async (req, res) => {
     try{
+        const {_id, old_password, new_password} = req.body;
 
-    } catch(error) {
+        const user = await Users.findOne(_id)
+
+        if (await bcrypt.compare(old_password, user.password)) {
+
+            const hash_pass = await bcrypt.hash(new_password, 10)
+            await Users.findOne({_id : _id}, {password : hash_pass}, {new : true})
+
+            res.status(200).json({
+                success : true,
+                message : "Password reset successfully!"
+
+            })
+        }
+        else{
+            return res.status(401).json({
+                success : false,
+                message : "Enter the correct old password"
+            }) 
+        }
+    }
+    catch(error) {
         return res.status(500).json({
             success : false,
             message : "Unknown error while log in!"
         })
     }
 }
+
+
 
 module.exports = {
     userSignUp,
@@ -295,6 +318,7 @@ module.exports = {
 
     userForgotPassword,
     forgotPasswordVerify,
-    setNewPassword
+    setNewPassword,
+    resetPassword
 
 }
