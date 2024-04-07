@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken")
 
-const auth = (req, res, next) => {
+const authentic = (req, res, next) => {
     try{
         const token = req.cookies[process.env.TOKEN_NAME]
         if(!token) {
@@ -9,8 +9,6 @@ const auth = (req, res, next) => {
                 message : "Login!"
             }) 
         }
-
-        console.log("the token is ", token)
 
         jwt.verify(token, process.env.JWT_SECRET_KEY, (error, result) => {
             if(error) {
@@ -41,7 +39,71 @@ const auth = (req, res, next) => {
     }
 }
 
+const isInstructor = (req, res, next) => {
+    try{
+        console.log("lsdjfksldfkjsdf ", req.user)
+        if(req.user.role != "INSTRUCTOR") {
+            return res.status(401).json({
+                success : false,
+                message : `Only instructor can use this functionality `
+            })   
+        }
+        next();
 
+    }
+    catch(error) {
+        console.log(error.message)
+        res.status(500).json({
+            success : false,
+            message : `Internal error while authorizing you as instructor`
+        })
+    }
+}
+
+const isStudent = (req, res, next) => {
+    try{
+        console.log("lsdjfksldfkjsdf ", req.user)
+        if(req.user.role != "STUDENT") {
+            return res.status(401).json({
+                success : false,
+                message : `Only Student can use this functionality `
+            })   
+        }
+        next();
+
+    }
+    catch(error) {
+        console.log(error.message)
+        res.status(500).json({
+            success : false,
+            message : `Internal error while authorizing you as Student`
+        })
+    }
+}
+
+const isAdmin = (req, res, next) => {
+    try{
+        console.log("lsdjfksldfkjsdf ", req.user)
+        if(req.user.role != "ADMIN") {
+            return res.status(401).json({
+                success : false,
+                message : `Only Admin can use this functionality `
+            })   
+        }
+        next();
+
+    }
+    catch(error) {
+        console.log(error.message)
+        res.status(500).json({
+            success : false,
+            message : `Internal error while authorizing you as Admin`
+        })
+    }
+}
 module.exports = {
-    auth
+    authentic,
+    isInstructor,
+    isStudent,
+    isAdmin
 }
