@@ -1,6 +1,7 @@
 const {Users}  = require("../models/userModel")
 const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const sendEmail = require("../config/sendGridConfig");
 require("dotenv").config();
 
 const userSignUp = async (req, res) => {
@@ -97,6 +98,18 @@ const userLogIn = async (req, res) => {
 
 const userForgotPassword = async (req, res) => {
     try{
+        // check if the email is valid
+        sendEmail()
+        // const {email} = req.body
+        // const isUser = await Users.findOne({email : email})
+        // if(!isUser) {
+        //     return res.status(404).json({
+        //         success : false,
+        //         message : "This user doesn't exists!"
+        //     })
+        // }
+        res.send("chal gaya email")
+        // res.redirec('/setFo')
 
     } catch(error) {
         return res.status(500).json({
@@ -113,6 +126,17 @@ const userVerify = async (req, res) => {
         return res.status(500).json({
             success : false,
             message : "Unknown error while verifying user!"
+        })
+    }
+}
+
+const updateUser = async (req, res) => {
+    try{
+
+    } catch(error) {
+        return res.status(500).json({
+            success : false,
+            message : "Unknown error while log in!"
         })
     }
 }
