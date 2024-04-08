@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const coursesSchema = new mongoose.Schema({
+const courseSchema = new mongoose.Schema({
     instructor : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "Users"
@@ -14,14 +14,16 @@ const coursesSchema = new mongoose.Schema({
         required : true
     },
     launch_date : {
-        type : Date,
-        default : Date.now()
+        type : Date, // Launch date is not needed to be Date.now(), pehle koi banayega, material daalega and all, tab jaake hoga woh lauch, so jab koi "launch" pei click karega, tab jaake launch likha aana chahiye ismpei, 
     },
     expriry_data : {
         type : Date
     },
     description : {
         type : String
+    },
+    banner : {
+        type : String, // image link string chahiye hogi hamme banner ke liye
     },
     netDuration : {
         type : Number // Joh videos daali jaayegi, unko total sum time.
@@ -35,7 +37,7 @@ const coursesSchema = new mongoose.Schema({
     chapters : [
         {
             type : mongoose.Schema.Types.ObjectId,
-            ref : "Chapters"
+            ref : "Chapter"
         }
     ]
     // Yaha enrollment wala bhi banana hai
@@ -45,14 +47,14 @@ const coursesSchema = new mongoose.Schema({
     timestamps : true
 })
 
-const Courses  = new mongoose.model("Courses", coursesSchema)
+const Course  = new mongoose.model("Course", courseSchema)
 
 
 
 const chaptersSchema = new mongoose.Schema({
     course_id : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : "Courses"
+        ref : "Course"
     },
     name : {
         type : String,
@@ -67,13 +69,13 @@ const chaptersSchema = new mongoose.Schema({
 {
     timestamps : true
 })
-const Chapters = new mongoose.model("Chapters", chaptersSchema)
+const Chapter = new mongoose.model("Chapter", chaptersSchema)
 
 
 const contentSchema = new mongoose.Schema({
     chapter_id : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : "Chapters"
+        ref : "Chapter"
     },
     sub_topic_name : String,
     video_url : {
@@ -87,8 +89,8 @@ const contentSchema = new mongoose.Schema({
 const Content = new mongoose.model("Content", contentSchema)
 
 module.exports = {
-    Courses,
-    Chapters,
+    Course,
+    Chapter,
     Content
 }
 

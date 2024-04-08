@@ -3,8 +3,9 @@ const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 require("dotenv").config();
 
-const userRoute = require("./routes/userRoute")
 const dbConnect = require("./config/dbConnection")
+const userRoute = require("./routes/userRoute")
+const courseRoute = require("./routes/courseRoute")
 
 
 
@@ -16,6 +17,7 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({extended : true}))
 
 app.use("/api/auth", userRoute)
+app.use("api/course/", courseRoute)
 
 
 dbConnect();
