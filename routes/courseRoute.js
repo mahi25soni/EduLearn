@@ -5,24 +5,24 @@ const router = express.Router()
 
 
 router.post("/createCourse", createCourse)
-router.post("/addChapter/:course_id", addChapter)
+router.post("/addChapter/:_id", addChapter)
 
 // onChange ka use karke pata chal jayega konsi field mei change hai
 // and then woh woh field inn updates wali functino mei bhej di jaayegi
-router.patch("/update/:course_id", updateCourse)
-router.patch("/update/chapter/:chapter_id", updateChapter)
+router.patch("/update/:_id", updateCourse)
+router.patch("/update/chapter/:_id", updateChapter)
 
-router.delete("/delete/:course_id", deleteCourse)
-router.delete("/delete/chapter/:chapter_id", deleteChapter)
-
-
-router.post("/addContent/:chapter_id")
-router.patch("/update/content/:content_id")
-router.delete("/delete/content/:content_id")
+router.delete("/delete/:_id", deleteCourse)
+router.delete("/delete/chapter/:_id", deleteChapter)
 
 
+router.post("/addContent/:_id")
+router.patch("/update/content/:_id")
+router.delete("/delete/content/:_id")
 
-router.get("/course_id") // return the launched course 
+
+
+router.get("/_id") // return the launched course 
 
 
 module.exports = router;

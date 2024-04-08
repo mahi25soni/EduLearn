@@ -52,12 +52,13 @@ const addChapter = async (req, res) => {
 
 const updateCourse = async(req,res) => {
     try{
-        const course_id = req.params.course_id
-        const your_course = await Course. 
+        const _id = req.params._id
+        const updated_course = await Course.findByIdAndUpdate(_id , req.body, {new:true})
+
         res.status(200).json({
             success : true,
             message : "Course Updated!",
-            data : new_chapter
+            data : updated_course
         })
     }
     catch(error) {
@@ -68,15 +69,18 @@ const updateCourse = async(req,res) => {
         })
     }
 }
+
 
 
 const updateChapter = async(req,res) => {
     try{
+        const _id = req.params._id
+        const updated_chapter = await Chapter.findByIdAndUpdate(_id , req.body, {new:true})
 
         res.status(200).json({
             success : true,
             message : "Chapter Updated!",
-            data : new_chapter
+            data : updated_chapter
         })
     }
     catch(error) {
@@ -89,13 +93,36 @@ const updateChapter = async(req,res) => {
 }
 
 
+
+
 const deleteCourse = async(req,res) => {
     try{
+        const _id = req.body._id
 
+        const your_course = await Course.findOneAndDelete({_id : _id})
+
+        //deleting all chapters of this course
+        your_course.chapters.forEach(async (chapter_id) => {
+            const chapter = await Chapter.findOneAndDelete({_id : chapter_id})
+
+            // deleting content of each chapter
+            chapter.contentList.forEach(async (content_id) => {
+                await Content.deleteOne({_id : content_id})
+            })
+        })
+
+        // deleting course id from students
+        your_course.students.forEach(async (student_id) => {
+            await Users.findByIdAndUpdate(student_id, {$pull : {your_courses : _id}}, {new : true})
+        })
+
+        // deleting course from instructors
+        await Users.findByIdAndUpdate(your_course.instructor,  {$pull : {your_courses : _id}}, {new : true})
+
+        // Enrollment and reviews wale bhi baaki hai abhi
         res.status(200).json({
             success : true,
-            message : "Course deleted!",
-            data : new_chapter
+            message : `${your_course.course_name} has been deleted!`,
         })
     }
     catch(error) {
@@ -111,10 +138,22 @@ const deleteCourse = async(req,res) => {
 const deleteChapter = async(req,res) => {
     try{
 
+        const _id = req.params._id
+
+        const the_chapter = await Chapter.findOneAndDelete(_id)
+
+        // delete all content
+        the_chapter.contentList.forEach(async (content_id) => {
+            await Content.deleteOne({_id : content_id})
+        })
+
+        // delete chapter from course
+        await Course.findByIdAndUpdate({_id : the_chapter.course_id}, {$pull : {chapters : _id}})
+
+
         res.status(200).json({
             success : true,
-            message : "Chapter deeleted!",
-            data : new_chapter
+            message : `${the_chapter.name} has been deleted!`,
         })
     }
     catch(error) {

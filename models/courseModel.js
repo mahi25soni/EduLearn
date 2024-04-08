@@ -62,7 +62,8 @@ const chaptersSchema = new mongoose.Schema({
     },
     contentList : [
         {
-            tupe 
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Content" 
         }
     ]
 },
