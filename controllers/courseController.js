@@ -1,3 +1,4 @@
+const { populate } = require("dotenv")
 const {Course, Chapter, Content} = require("../models/courseModel")
 const { Users } = require("../models/userModel")
 
@@ -28,7 +29,7 @@ const createCourse = async (req, res) => {
 
 const addChapter = async (req, res) => {
     try{
-        const course_id = req.params.course_id
+        const course_id = req.params._id
 
         const new_chapter = await Chapter.create({
             course_id : course_id, name : req.body.name
@@ -97,7 +98,7 @@ const updateChapter = async(req,res) => {
 
 const deleteCourse = async(req,res) => {
     try{
-        const _id = req.body._id
+        const _id = req.params._id
 
         const your_course = await Course.findOneAndDelete({_id : _id})
 
@@ -166,11 +167,38 @@ const deleteChapter = async(req,res) => {
 }
 
 
+const getCourseById = async(req, res) => {
+    try{
+        const course_id = req.params._id
+
+        const the_course = await Course.findOne({_id : course_id}).populate({
+            path : "chapters",
+            populate : {
+                path : "contentList"
+            }
+        })
+
+        res.status(200).json({
+            success : true,
+            data : the_course,
+        })
+    }
+    catch(error) {
+        console.log(error.message)
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error!"
+        })
+    }
+}
+
+
 module.exports = {
     createCourse,
     addChapter,
     updateCourse,
     updateChapter,
     deleteCourse,
-    deleteChapter
+    deleteChapter,
+    getCourseById
 }

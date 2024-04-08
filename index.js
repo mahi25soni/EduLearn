@@ -5,7 +5,8 @@ require("dotenv").config();
 
 const dbConnect = require("./config/dbConnection")
 const userRoute = require("./routes/userRoute")
-const courseRoute = require("./routes/courseRoute")
+const courseRoute = require("./routes/courseRoute");
+const { authentic } = require("./middlewares/userAuth");
 
 
 
@@ -17,7 +18,8 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({extended : true}))
 
 app.use("/api/auth", userRoute)
-app.use("api/course/", courseRoute)
+app.use("/api/course/", authentic, courseRoute)
+
 
 
 dbConnect();

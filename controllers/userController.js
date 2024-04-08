@@ -76,7 +76,7 @@ const userSignUp = async (req, res) => {
             password : hash_pass
         })
 
-        sendOtpViaEmail(new_user)
+        // sendOtpViaEmail(new_user)
 
         // yaha res json ki jagah res.redirect better option rahega
         res.status(201).json({
