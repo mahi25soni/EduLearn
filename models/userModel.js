@@ -36,7 +36,16 @@ const userSchema = new mongoose.Schema({
     active : {
         type : Boolean,
         default : false
-    }
+    },
+    // teacher ke liye uske created course,
+    // student ke liye usko bought one
+    
+    your_courses : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Course"
+        }
+    ]
 },
 {
     timestamps : true
