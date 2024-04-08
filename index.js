@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser")
 require("dotenv").config();
 
 const dbConnect = require("./config/dbConnection")
+const cloudConnect = require("./config/cloudinarySetup")
 const userRoute = require("./routes/userRoute")
 const courseRoute = require("./routes/courseRoute");
 const { authentic } = require("./middlewares/userAuth");
@@ -23,6 +24,7 @@ app.use("/api/course/", authentic, courseRoute)
 
 
 dbConnect();
+cloudConnect();
 
 app.listen(PORT, () => {
     console.log("The server is working")
