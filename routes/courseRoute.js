@@ -5,6 +5,10 @@ const { createCourse, addChapter, updateCourse, updateChapter, deleteCourse, del
 const { addContent } = require("../controllers/contentContoller")
 const {isAdmin, isInstructor, isStudent} = require("../middlewares/userAuth")
 
+const multer = require("multer")
+const upload = multer({dest : 'uploads/'})
+const content_files = upload.fields([{name : 'lecture_video', maxCount : 1}, {name : 'lecture_material', maxCount : 1}])
+
 
 router.post("/createCourse", isInstructor, createCourse)
 router.post("/addChapter/:_id", isInstructor, addChapter)
@@ -18,7 +22,7 @@ router.delete("/delete/:_id",isInstructor, deleteCourse)
 router.delete("/delete/chapter/:_id",isInstructor, deleteChapter)
 
 
-router.post("/addContent/:_id", isInstructor,addContent)
+router.post("/addContent/:_id", isInstructor, content_files, addContent)
 router.patch("/update/content/:_id")
 router.delete("/delete/content/:_id")
 
