@@ -1,6 +1,7 @@
 const { populate } = require("dotenv")
 const {Course, Chapter, Content} = require("../models/courseModel")
 const { Users } = require("../models/userModel")
+const cloudinary = require('cloudinary').v2
 
 
 const createCourse = async (req, res) => {
@@ -178,6 +179,7 @@ const getCourseById = async(req, res) => {
             }
         })
 
+        console.log("the course is " , the_course)
         res.status(200).json({
             success : true,
             data : the_course,

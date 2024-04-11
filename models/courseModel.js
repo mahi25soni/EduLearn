@@ -82,7 +82,9 @@ const contentSchema = new mongoose.Schema({
     video_url : {
         type : String // baad mei isko required karna hai mujhe
     },
-    study_material_url : String // ye optional hi rakhunga, better rahega bc
+    video_cloud_id : String,
+    study_material_url : String,// ye optional hi rakhunga, better rahega bc
+    study_material_cloud_id : String
 },
 {
     timestamps : true

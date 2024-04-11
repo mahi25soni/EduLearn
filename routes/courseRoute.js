@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 
 const { createCourse, addChapter, updateCourse, updateChapter, deleteCourse, deleteChapter, getCourseById } = require("../controllers/courseController")
-const { addContent } = require("../controllers/contentContoller")
+const { addContent, updateContent, deleteContent } = require("../controllers/contentContoller")
 const {isAdmin, isInstructor, isStudent} = require("../middlewares/userAuth")
 
 const multer = require("multer")
@@ -23,8 +23,8 @@ router.delete("/delete/chapter/:_id",isInstructor, deleteChapter)
 
 
 router.post("/addContent/:_id", isInstructor, content_files, addContent)
-router.patch("/update/content/:_id")
-router.delete("/delete/content/:_id")
+router.patch("/update/content/:_id", isInstructor, content_files, updateContent)
+router.delete("/delete/content/:_id", isInstructor, deleteContent)
 
 
 
