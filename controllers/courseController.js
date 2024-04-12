@@ -1,6 +1,7 @@
 const { populate } = require("dotenv")
 const {Course, Chapter, Content} = require("../models/courseModel")
 const { Users } = require("../models/userModel")
+const { deleteContentFunc } = require("./contentContoller")
 const cloudinary = require('cloudinary').v2
 
 
@@ -108,9 +109,12 @@ const deleteCourse = async(req,res) => {
             const chapter = await Chapter.findOneAndDelete({_id : chapter_id})
 
             // deleting content of each chapter
+            let x;
             chapter.contentList.forEach(async (content_id) => {
-                await Content.deleteOne({_id : content_id})
+                x = await deleteContentFunc(content_id)
             })
+
+
         })
 
         // deleting course id from students
@@ -142,11 +146,12 @@ const deleteChapter = async(req,res) => {
 
         const _id = req.params._id
 
-        const the_chapter = await Chapter.findOneAndDelete(_id)
+        const the_chapter = await Chapter.findOneAndDelete({_id : _id})
 
         // delete all content
         the_chapter.contentList.forEach(async (content_id) => {
-            await Content.deleteOne({_id : content_id})
+            deleteContentFunc(content_id)
+
         })
 
         // delete chapter from course

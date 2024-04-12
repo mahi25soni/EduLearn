@@ -1,6 +1,7 @@
 const {Course, Chapter, Content}  = require("../models/courseModel")
 const cloudinary = require('cloudinary').v2
 
+
 async function uploadOnMyCloud (filepath, course, chapter, sub_topic) {
     const options = {
         folder : `${course}/${chapter}/${sub_topic}`,
@@ -9,8 +10,24 @@ async function uploadOnMyCloud (filepath, course, chapter, sub_topic) {
     return await cloudinary.uploader.upload(filepath, options);
 }
 
-async function deleteSingiFromMyCloud(cloud_path) {
-    return await cloudinary.uploader.destroy
+async function deleteContentFunc(content_id) {
+    try{
+        const contentInfo = await Content.findOne({_id : content_id})
+    
+        const folder_name_array  = contentInfo.video_cloud_id.split("/")
+        folder_name_array.pop();
+        let cloud_folder_path = folder_name_array.join('/');
+    
+        const toReturn = await cloudinary.api.delete_resources_by_prefix(cloud_folder_path)
+
+        await cloudinary.api.delete_folder(cloud_folder_path)
+        await Content.deleteOne({_id : content_id})
+        console.log("The inder is ", toReturn)
+        return toReturn;
+    }
+    catch(error) {
+        console.log(error.message)
+    }
 }
 const addContent = async (req, res) => {
     try{
@@ -142,17 +159,8 @@ const updateContent = async (req, res) => {
 const deleteContent = async (req, res) => {
     try{
         const content_id = req.params._id
-        const contentInfo = await Content.findOne({_id : content_id})
 
-        const folder_name_array  = contentInfo.video_cloud_id.split("/")
-        folder_name_array.pop();
-        let cloud_folder_path = folder_name_array.join('/');
-
-        await cloudinary.api.delete_resources_by_prefix(cloud_folder_path)
-        console.log("kyaa hi masal hai bc")
-        await cloudinary.api.delete_folder(cloud_folder_path)
-        await Content.deleteOne({_id : content_id})
-
+        deleteContentFunc(content_id)
 
         res.status(200).json({
             success: true,
@@ -171,5 +179,6 @@ const deleteContent = async (req, res) => {
 module.exports = {
     addContent,
     updateContent,
-    deleteContent
+    deleteContent,
+    deleteContentFunc
 }
