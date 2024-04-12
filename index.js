@@ -8,6 +8,7 @@ const cloudConnect = require("./config/cloudinarySetup")
 const userRoute = require("./routes/userRoute")
 const courseRoute = require("./routes/courseRoute");
 const { authentic } = require("./middlewares/userAuth");
+const reviewRatingRoute = require("./routes/reviewRatingRoute")
 
 
 
@@ -20,6 +21,7 @@ app.use(bodyParser.urlencoded({extended : true}))
 
 app.use("/api/auth", userRoute)
 app.use("/api/course/", authentic, courseRoute)
+app.use("/api/review/", reviewRatingRoute)
 
 
 

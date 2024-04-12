@@ -39,7 +39,17 @@ const courseSchema = new mongoose.Schema({
             type : mongoose.Schema.Types.ObjectId,
             ref : "Chapter"
         }
-    ]
+    ],
+    reviews : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "CourseReview"
+        }
+    ],
+    ratings : {
+        type : Number,
+        default : 0
+    }
     // Yaha enrollment wala bhi banana hai
     // and rating reviews wala bhi.
 },
