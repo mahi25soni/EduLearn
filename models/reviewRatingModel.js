@@ -9,7 +9,7 @@ const courseReviewSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "Users"
     },
-    reviews : String
+    review : String
 },
 {
     timestamps : true

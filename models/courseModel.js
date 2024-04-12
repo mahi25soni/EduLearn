@@ -46,9 +46,13 @@ const courseSchema = new mongoose.Schema({
             ref : "CourseReview"
         }
     ],
-    ratings : {
+    rating : {
         type : Number,
         default : 0
+    },
+    raters : {
+        type : Number,
+        default : 0 
     }
     // Yaha enrollment wala bhi banana hai
     // and rating reviews wala bhi.
