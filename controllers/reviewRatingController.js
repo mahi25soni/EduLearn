@@ -1,46 +1,125 @@
 const { Course } = require("../models/courseModel");
-const { CourseRating } = require("../models/reviewRatingModel")
+const {TempRating, CourseRating, CourseReview } = require("../models/reviewRatingModel")
 const mongoose = require("mongoose")
 
 const postRating = async (req, res) => {
-    const session  = await mongoose.startSession()
-    try{
-        session.startTransaction();
-    
+    try{    
         const course_id = req.params.course_id
-        const new_rating = await CourseRating.create([
+        const new_rating = await CourseRating.create(
             {
                 course_id : course_id,
                 ...req.body
             }
-        ], {session})
+        )
 
-        const the_course = await Course.findOne({_id : course_id}, {session})
+        const the_course = await Course.findOne({_id : course_id})
 
-        const total_rating_yet = the_course.rating*the_course.raters
+        let total_rating_yet = the_course.rating*the_course.raters
         total_rating_yet += new_rating.rating
-        const total_raters = the_course.raters + 1;
-        const final_average_rating = total_rating_yet/ratters
+        let total_raters = the_course.raters + 1;
+        let final_average_rating = total_rating_yet/total_raters
 
-        await Course.findOneAndUpdate({_id : course_id}, {
-            rating : final_average_rating,
-            raters : total_raters
-        }, {new : true}, {session})
 
-        await session.commitTransaction()
+        // const updated_course = await Course.findOneAndUpdate({_id : course_id}, {
+        //     rating : final_average_rating,
+        //     raters : total_raters
+        // }, {new : true})
+
+
+        res.status(200).json({
+            success : true,
+            message : "New rating added!",
+            data : updated_course
+        })
 
     }
     catch(err) {
         console.log(err.message)
-        await session.commitTransaction()
+        if(err.code == 11000){
+            return res.status(500).json({
+                success : false,
+                message : "You already rated this course, can't rate it again"
+            })
+        }
         return res.status(500).json({
             success : false,
             message : "Internal Server Error!"
         })
     }
-    session.endSession();
 }
 
+const createReview = async (req, res) => {
+    try{
+        const course_id = req.params.course_id
+
+        const new_review = await CourseReview.create({
+            course_id : course_id,
+            ...req.body
+        })
+        await Course.findByIdAndUpdate({_id : course_id}, {$push :{reviews : new_review._id}}, {new : true})
+
+        res.status(200).json({
+            success : true,
+            message : "New reviews added!",
+            data : new_review
+        })
+    }
+    catch(err) {
+        console.log(err.message)
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error!"
+        })
+    }
+}
+
+const getAllReviews = async (req, res) => {
+    try{
+        const course_id = req.params.course_id
+        const allReviews = await CourseReview.find({ course_id }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success : true,
+            message : "New reviews added!",
+            data : allReviews
+        })
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error!"
+        })
+    }
+}
+
+const deleteReview = async (req, res) => {
+    try{
+        const review_id = req.params.review_id
+        await CourseReview.delete({_id : review_id})
+
+        res.status(200).json({
+            success : true,
+            message : "Review Deleted!",
+        })
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server Error!"
+        })
+    }
+}
+
+
+
+
 module.exports = {
-    postRating
+    postRating,
+    createReview,
+    getAllReviews,
+    deleteReview
 }

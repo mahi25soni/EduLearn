@@ -48,14 +48,13 @@ const courseSchema = new mongoose.Schema({
     ],
     rating : {
         type : Number,
-        default : 0
+        default : 0,
     },
     raters : {
         type : Number,
         default : 0 
     }
     // Yaha enrollment wala bhi banana hai
-    // and rating reviews wala bhi.
 },
 {
     timestamps : true

@@ -2,6 +2,7 @@ const { populate } = require("dotenv")
 const {Course, Chapter, Content} = require("../models/courseModel")
 const { Users } = require("../models/userModel")
 const { deleteContentFunc } = require("./contentContoller")
+const { CourseReview, CourseRating } = require("../models/reviewRatingModel")
 const cloudinary = require('cloudinary').v2
 
 
@@ -109,9 +110,9 @@ const deleteCourse = async(req,res) => {
             const chapter = await Chapter.findOneAndDelete({_id : chapter_id})
 
             // deleting content of each chapter
-            let x;
+            
             chapter.contentList.forEach(async (content_id) => {
-                x = await deleteContentFunc(content_id)
+                await deleteContentFunc(content_id)
             })
 
 
@@ -125,7 +126,12 @@ const deleteCourse = async(req,res) => {
         // deleting course from instructors
         await Users.findByIdAndUpdate(your_course.instructor,  {$pull : {your_courses : _id}}, {new : true})
 
-        // Enrollment and reviews wale bhi baaki hai abhi
+        // delete reviews and ratings of course
+        await CourseReview.deleteMany({course_id : your_course._id})
+        await CourseRating.deleteMany({course_id : your_course._id})
+
+        // EnrollMent baaki hai bas
+
         res.status(200).json({
             success : true,
             message : `${your_course.course_name} has been deleted!`,
